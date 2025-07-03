@@ -1,25 +1,22 @@
 from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.responses import StreamingResponse
 from openai import OpenAI
-from config import Config
+from config import GPTConfig
+from typing import List, Dict, Optional, Any
 import json
 import uvicorn
 
-from transformers import AutoTokenizer
-
-from typing import List
-import random
 
 app = FastAPI()
 
 client = OpenAI(
-    base_url=Config.BASE_URL,
-    api_key=Config.OPENAI_API_KEY,
+    base_url=GPTConfig.BASE_URL,
+    api_key=GPTConfig.OPENAI_API_KEY,
 )
 
 verify_client = OpenAI(
-    base_url=Config.BASE_URL,
-    api_key=Config.OPENAI_API_KEY,
+    base_url=GPTConfig.BASE_URL,
+    api_key=GPTConfig.OPENAI_API_KEY,
 )
 
 @app.get("/")
@@ -38,7 +35,7 @@ def verify_step(messages: List[dict], current_response: str, next_token: str):
         add_generation_prompt=False,
     )[:-len("<end_of_turn>")-1]
     next_predict_token = verify_client.completions.create(
-        model=Config.MODEL,
+        model=GPTConfig.MODEL,
         prompt=prompt,
         stream=False,
         top_p=0.95,
@@ -56,7 +53,7 @@ def chat(messages: List[dict]):
     def generate(messages: List[dict]):
         try:
             stream = client.chat.completions.create(
-                model=Config.MODEL,
+                model=GPTConfig.MODEL,
                 messages=messages,
                 stream = True,
                 # temperature=0
@@ -80,7 +77,6 @@ def chat(messages: List[dict]):
             media_type="text/event-stream",
             headers={"X-Accel-Buffering": "no"}
         )
-
 
 if __name__ == "__main__":
     uvicorn.run("app:app")

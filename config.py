@@ -12,5 +12,5 @@ class GPTConfig:
 
 class CasualLMConfig:
     MODEL_NAME = os.getenv("MODEL", "Qwen/Qwen-7B")
-    MAX_TOKENS = int(os.getenv("MAX_TOKENS", 150))
+    MAX_TOKENS = int(os.getenv("MAX_TOKENS", 1024))
     TEMPERATURE = float(os.getenv("TEMPERATURE", 0.7))

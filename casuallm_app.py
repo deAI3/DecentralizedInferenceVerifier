@@ -17,6 +17,7 @@ tokenizer = AutoTokenizer.from_pretrained(CasualLMConfig.MODEL_NAME, trust_remot
 
 class ChatResponse:
     output: str
+    stop: bool = False
     kv_cache: Optional[str] = None
 @app.get("/")
 async def root():
@@ -100,10 +101,14 @@ def chat(messages: List[dict], kv_cache, max_tokens: Optional[int]):
         
         # Serialize new KV cache
         new_kv_cache = serialize_kv_cache(outputs.past_key_values)
-        
+
+        stop = False
+        if generated_text.endswith(tokenizer.eos_token or "</s>"):
+            stop = True
         response = ChatResponse(
             output=generated_text,
-            kv_cache=new_kv_cache
+            stop=stop,
+            kv_cache=new_kv_cache,
         )
         
         return response
